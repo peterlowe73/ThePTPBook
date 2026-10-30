@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The PTP Book</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#12301f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PTP Book">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: racecard list. Sticky filter bar, one card per horse, latest run first, sale line underneath. */
+:root {
+  --bg: #f3f5f2;
+  --surface: #ffffff;
+  --ink: #18201b;
+  --muted: #5d6b62;
+  --line: #d9e0db;
+  --accent: #173f2b;
+  --gold-rule: #c9a24a;
+  --cream: #f3ead3;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2eee7;
+  --gold: #b88a16; --silver: #7c8792; --bronze: #9a5b2c;
+  --sale: #7a3b6f; --sale-soft: #f3e7f0;
+  --sold: #1d5a3a;
+  --f-brand: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --warn: #8a5a00; --warn-soft: #fbf1dc;
+  --f-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111613; --surface: #19201c; --ink: #e6ece8; --muted: #9aa8a0; --line: #2b3530;
+  --accent: #6fbf8f; --accent-ink: #0d1510; --accent-soft: #1f3328;
+  --gold: #d8ad3c; --silver: #a9b3bd; --bronze: #c98552;
+  --sale: #d79acb; --sale-soft: #33232f; --sold: #6fbf8f; --warn: #e3b552; --warn-soft: #33290f;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #19201c; --ink: #e6ece8; --muted: #9aa8a0; --line: #2b3530;
+  --accent: #6fbf8f; --accent-ink: #0d1510; --accent-soft: #1f3328;
+  --gold: #d8ad3c; --silver: #a9b3bd; --bronze: #c98552;
+  --sale: #d79acb; --sale-soft: #33232f; --sold: #6fbf8f; --warn: #e3b552; --warn-soft: #33290f;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: #12301f; }
+a { color: inherit; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+header.top { background: #173f2b; color: #f3ead3; }
+header.top .refresh { color: #f3ead3; }
+header.top .wrap { padding-block: 18px 14px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 30px; letter-spacing: .02em; margin: 0; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+h1.brand { font-family: var(--f-brand); font-weight: 400; text-transform: uppercase; letter-spacing: .16em; font-size: 25px; line-height: 1; color: #f3ead3; margin: 0; display: inline-flex; align-items: baseline; gap: .42em; padding-bottom: 9px; border-bottom: 1px solid rgba(201,162,74,.75); }
+h1.brand .brand-the { font-size: .56em; letter-spacing: .3em; color: #c9a24a; }
+header.top { background: radial-gradient(140% 160% at 20% 0%, #1b4a32 0%, #12301f 60%, #0d2517 100%); border-bottom: 1px solid rgba(201,162,74,.45); }
+header.top .wrap { padding-block: 20px 16px; align-items: center; }
+header.top .sub { font-size: 12px; letter-spacing: .06em; opacity: .7; margin-top: 8px; color: #f3ead3; }
+header.top .refresh { color: #e9d9a8; border: 1px solid rgba(201,162,74,.7); background: transparent; font-weight: 600; letter-spacing: .04em; border-radius: 4px; }
+header.top .refresh:hover { background: rgba(201,162,74,.12); }
+.sub { font-size: 13px; opacity: .85; margin-top: 4px; }
+.refresh { font: 600 13px var(--f-body); background: transparent; color: var(--accent-ink); border: 1px solid currentColor; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.refresh:disabled { opacity: .5; cursor: default; }
+.refresh:focus-visible, .chip:focus-visible, input:focus-visible, .card summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
+.stat { background: var(--surface); padding: 10px 12px; border: 0; text-align: left; color: var(--ink); font: inherit; cursor: pointer; position: relative; }
+.stat:hover { background: var(--accent-soft); }
+.stat[aria-pressed="true"] { box-shadow: inset 0 -3px 0 var(--accent); }
+.stat:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.stat b { display: block; font: 600 24px var(--f-display); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+.filters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.filters .wrap { padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+#q { width: 100%; font: 400 15px var(--f-body); padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.chip { font: 600 13px var(--f-body); padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .08s ease; }
+.chip:active { transform: scale(.96); }
+button, summary, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#list { transition: opacity .12s ease; }
+#list.busy { opacity: .55; }
+.more { align-self: center; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.count { margin-left: auto; font-size: 13px; color: var(--muted); }
+
+main .wrap { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 10px; }
+.notice { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 12px 14px; font-size: 14px; }
+.notice b { display: block; margin-bottom: 2px; }
+.empty { color: var(--muted); text-align: center; padding: 40px 0; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.card summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+.card summary::-webkit-details-marker { display: none; }
+.pos { grid-row: span 3; width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; font: 700 20px var(--f-display); color: #fff; font-variant-numeric: tabular-nums; }
+.p1 { background: var(--gold); } .p2 { background: var(--silver); } .p3 { background: var(--bronze); }
+.px { background: var(--muted); } .pos.nf { font-size: 14px; letter-spacing: .02em; }
+.runs .n.unpl { color: var(--muted); }
+.chip.scope-all[hidden] { display: none; }
+.name { font: 700 21px var(--f-display); letter-spacing: .01em; line-height: 1.1; min-width: 0; overflow-wrap: anywhere; }
+.flag { font: 500 11px var(--f-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: 3px; }
+.breed { font-size: 13px; color: var(--muted); min-width: 0; }
+.last { font-size: 14px; min-width: 0; }
+.last .date { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.saleline { grid-column: 1 / -1; margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font: 600 12px var(--f-body); padding: 3px 8px; border-radius: 5px; background: var(--sale-soft); color: var(--sale); }
+.tag.sold { background: var(--accent-soft); color: var(--sold); }
+.tag.goffs { background: var(--accent-soft); color: var(--sold); }
+.tag.forsale { background: var(--sale); color: var(--surface); }
+a.tag { text-decoration: none; }
+.tag.b-goffs { background: #00483a; color: #ffffff; }
+.tag.b-tatts-ie { background: #fbb415; color: #112e4d; }
+.tag.b-tatts-chelt { background: #fbb415; color: #4b4841; }
+.tag.b-tatts { background: #c4a979; color: #112e4d; }
+.tag.b-tatts-onl { background: #ff8b04; color: #112e4d; }
+.tag.b-arqana { background: #8c1d40; color: #ffffff; }
+.tag.b-tbid { background: #272629; color: #ffffff; border-left: 3px solid #f05136; }
+a.tag:hover { text-decoration: underline; }
+.tag.tatts { background: var(--sale-soft); color: var(--sale); }
+.tag.muted { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+.detail { border-top: 1px solid var(--line); padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+.detail h3 { font: 600 12px var(--f-body); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 4px; }
+.runs, .lots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.runs li, .lots li { display: grid; grid-template-columns: 34px 1fr; gap: 2px 10px; }
+.runs .n { font: 700 16px var(--f-display); font-variant-numeric: tabular-nums; }
+.meta { color: var(--muted); font-size: 13px; }
+.comment { font-style: italic; color: var(--muted); font-size: 13px; }
+.links { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+.links a { color: var(--accent); }
+.money { font-family: var(--f-mono); }
+
+.seg { display: flex; gap: 6px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#sire { font: 600 13px var(--f-body); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); max-width: 200px; }
+.ped { font-size: 13px; color: var(--muted); min-width: 0; }
+.ped b { color: var(--ink); font-weight: 600; }
+.pedsrc { font: 500 11px var(--f-mono); color: var(--muted); }
+.pedform { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pedform input { font: 400 14px var(--f-body); padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; }
+.pedform .act { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; }
+.btn { font: 600 13px var(--f-body); padding: 7px 14px; border-radius: 6px; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn:disabled { opacity: .5; }
+.msg { font-size: 13px; color: var(--muted); }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table.sires { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.sires th { text-align: right; font: 600 11px var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.sires td { text-align: right; padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.sires th:first-child, table.sires td:first-child { text-align: left; }
+table.sires tr:last-child td { border-bottom: 0; }
+table.sires button { font: 700 15px var(--f-body); background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; }
+.note { font-size: 13px; color: var(--muted); }
+.star { grid-column: 2; justify-self: end; grid-row: 1; font: 400 22px/1 var(--f-body); background: none; border: 0; color: var(--muted); cursor: pointer; padding: 0 2px; margin-top: -2px; }
+.star[aria-pressed="true"] { color: var(--gold); }
+.card summary { position: relative; }
+.card .name { padding-right: 28px; }
+.card .star { position: absolute; top: 10px; right: 12px; }
+.seasons .chip { padding: 5px 10px; }
+.topline { display: flex; gap: 8px; align-items: stretch; }
+.topline #q { flex: 1; min-width: 0; }
+.ftoggle { font: 600 14px var(--f-body); display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.ftoggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.ftoggle .badge { background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 20px; height: 20px; padding: 0 6px; display: inline-grid; place-items: center; font: 700 12px var(--f-body); }
+.fpanel { display: flex; flex-direction: column; gap: 8px; }
+.fpanel[hidden], .ftoggle .badge[hidden] { display: none; }
+.fsummary { justify-content: space-between; }
+.fgroup { display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: start; }
+.flabel { font: 600 11px var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-top: 8px; }
+.seg { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+.multi { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.multi summary { cursor: pointer; padding: 7px 10px; font: 600 13px var(--f-body); list-style: none; }
+.multi summary::-webkit-details-marker { display: none; }
+.multi summary::after { content: " ▾"; color: var(--muted); }
+.multi input[type="search"] { margin: 0 8px 6px; width: calc(100% - 16px); font: 400 14px var(--f-body); padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.multi .opts { max-height: 220px; overflow-y: auto; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 2px; }
+.multi label { display: flex; gap: 8px; align-items: center; font-size: 14px; padding: 4px 2px; cursor: pointer; }
+.multi label[hidden] { display: none; }
+.multi input[type="checkbox"] { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--accent); }
+.filters:has(#fpanel:not([hidden])) { position: static; }
+.multi label span { color: var(--muted); font-size: 12px; margin-left: auto; }
+@media (max-width: 520px) { .fgroup { grid-template-columns: 1fr; gap: 4px; } .flabel { padding-top: 0; } }
+.fsummary .count { margin-left: 0; }
+.linkbtn { font: 600 13px var(--f-body); background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; }
+.demo-banner { background: var(--warn-soft); color: var(--warn); font-size: 12px; text-align: center; padding: 4px 8px; }
+@media (max-width: 520px) { .pedform { grid-template-columns: 1fr; } }
+@media (max-width: 520px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  h1 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } .card:hover { border-color: var(--muted); } }
+.passform{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.passform input{flex:1;min-width:0;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.passform button{font:inherit;font-weight:600;padding:10px 16px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink)}
+body{padding-top:env(safe-area-inset-top)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1 class="brand" aria-label="The PTP Book"><span class="brand-the">The</span><span style="margin-right:-.16em">PTP Book</span></h1>
+      <div class="sub" id="sub">4 and 5-year-olds placed 1st to 3rd, GB and Ireland</div>
+    </div>
+    <button class="refresh" id="refresh" type="button">Refresh</button>
+  </div>
+</header>
+
+<div class="demo-banner" id="demo" hidden>Demo view: read-only · <button type="button" class="linkbtn" data-switch style="font-size:12px;color:inherit;text-decoration:underline">Change passcode</button></div>
+<section class="stats" aria-label="Summary">
+  <button class="stat" type="button" data-stat="all" aria-pressed="true"><b id="s-horses">–</b><span>Horses</span></button>
+  <button class="stat" type="button" data-stat="win" aria-pressed="false"><b id="s-win">–</b><span>Winners</span></button>
+  <button class="stat" type="button" data-stat="sale" aria-pressed="false"><b id="s-entered">–</b><span>For sale now</span></button>
+  <button class="stat" type="button" data-stat="sold" aria-pressed="false"><b id="s-sold">–</b><span id="s-sold-l">Sold this season</span></button>
+</section>
+
+<div class="filters">
+  <div class="wrap">
+    <div class="topline">
+      <input id="q" type="search" placeholder="Search horse, course, sire, trainer…" autocomplete="off">
+      <button class="ftoggle" id="ftoggle" type="button" aria-expanded="false" aria-controls="fpanel">Filters<span class="badge" id="fbadge" hidden>0</span><span class="chev" aria-hidden="true">▾</span></button>
+    </div>
+    <div class="fsummary row" id="fsummary"><span class="count" id="count"></span><span><button type="button" class="linkbtn" id="fclear" hidden>Clear filters</button><button type="button" class="linkbtn" id="csv" style="margin-left:14px">Export CSV</button><button type="button" class="linkbtn" data-switch style="margin-left:14px">Passcode</button></span></div>
+    <div class="fpanel" id="fpanel" hidden>
+    <div class="fgroup"><span class="flabel">Season</span><div class="row" id="f-season"></div></div>
+    <div class="fgroup"><span class="flabel">Country</span><div class="row">
+      <button class="chip" type="button" data-facet="country" data-v="IE">Ireland</button>
+      <button class="chip" type="button" data-facet="country" data-v="GB">GB</button></div></div>
+    <div class="fgroup"><span class="flabel">Runners</span><div class="row">
+      <button class="chip" type="button" data-scope="placed" aria-pressed="true">Placed 1st to 3rd</button>
+      <button class="chip" type="button" data-scope="all" aria-pressed="false">All runners</button></div></div>
+    <div class="fgroup"><span class="flabel">Placing</span><div class="row">
+      <button class="chip" type="button" data-facet="pos" data-v="1">Won</button>
+      <button class="chip" type="button" data-facet="pos" data-v="2">2nd</button>
+      <button class="chip" type="button" data-facet="pos" data-v="3">3rd</button>
+      <button class="chip scope-all" type="button" data-facet="pos" data-v="o">4th or worse</button>
+      <button class="chip scope-all" type="button" data-facet="pos" data-v="nf">Did not finish</button></div></div>
+    <div class="fgroup"><span class="flabel">Age</span><div class="row">
+      <button class="chip" type="button" data-facet="age" data-v="4">4yo</button>
+      <button class="chip" type="button" data-facet="age" data-v="5">5yo</button>
+      <button class="chip" type="button" data-facet="age" data-v="u" id="age-u">Not known</button></div></div>
+    <div class="fgroup"><span class="flabel">Sex</span><div class="row">
+      <button class="chip" type="button" data-facet="sex" data-v="g">Geldings</button>
+      <button class="chip" type="button" data-facet="sex" data-v="f">Mares &amp; fillies</button>
+      <button class="chip" type="button" data-facet="sex" data-v="c">Colts &amp; horses</button>
+      <button class="chip" type="button" data-facet="sex" data-v="u" id="sex-u">Not known</button></div></div>
+    <div class="fgroup"><span class="flabel">Sales</span><div class="row">
+      <button class="chip" type="button" data-facet="status" data-v="sale">For sale now</button>
+      <button class="chip" type="button" data-facet="status" data-v="sold">Sold</button>
+      <button class="chip" type="button" data-facet="status" data-v="ps">Sold privately</button>
+      <button class="chip" type="button" data-facet="status" data-v="unsold">Not sold</button>
+      <button class="chip" type="button" data-facet="status" data-v="watch" id="watchchip">★ Watchlist</button></div></div>
+    <div class="fgroup"><span class="flabel">Course</span><details class="multi" id="m-course"><summary>All courses</summary><input type="search" placeholder="Find a course" data-find="course"><div class="opts" id="o-course"></div></details></div>
+    <div class="fgroup"><span class="flabel">Sire</span><details class="multi" id="m-sire"><summary>All sires</summary><input type="search" placeholder="Find a sire" data-find="sire"><div class="opts" id="o-sire"></div></details></div>
+    </div>
+    <div class="row seg" role="group" aria-label="View">
+      <button class="chip" type="button" data-view="horses" aria-pressed="true">Horses</button>
+      <button class="chip" type="button" data-view="sires" aria-pressed="false">Sires</button>
+      <button class="chip" type="button" data-view="handlers" aria-pressed="false">Handlers</button>
+      <button class="chip" type="button" data-view="consignors" aria-pressed="false">Consignors</button>
+      <button class="chip" type="button" data-view="courses" aria-pressed="false">Courses</button>
+      <button class="chip" type="button" data-view="buyers" aria-pressed="false">Buyers</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap" id="list">
+    <div class="empty" id="loading">Loading results from your database…</div>
+  </div>
+</main>
+
+<script>
+const API = "https://jolgznlrrxjowoypukdg.supabase.co/rest/v1/rpc/";
+const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbGd6bmxycnhqb3dveXB1a2RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMjAxODQsImV4cCI6MjEwODc5NjE4NH0.WnO3U8wi3M0D-AQAU1SNJoIbz7HsZFlbxdVNrRDSdiU";
+const KEY_STORE = "ptp_passcode";
+function getKey() { try { return localStorage.getItem(KEY_STORE) || ""; } catch { return window.__ptpKey || ""; } }
+function setKey(k) { window.__ptpKey = k; try { k ? localStorage.setItem(KEY_STORE, k) : localStorage.removeItem(KEY_STORE); } catch {} }
+async function rpc(fn, body) {
+  const r = await fetch(API + fn, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + ANON, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const t = await r.text();
+  if (!r.ok) { let m = t; try { m = JSON.parse(t).message || t; } catch {} const err = new Error(m); err.code = /bad passcode/.test(m) ? "bad_key" : "http_" + r.status; throw err; }
+  return t ? JSON.parse(t) : null;
+}
+function askKey(msg) {
+  $("list").innerHTML = `<div class="notice"><b>Enter passcode</b>${esc(msg || "")}<form class="passform" id="passform"><input id="pass" type="password" autocomplete="current-password" placeholder="Passcode" required><button type="submit">Open</button></form></div>`;
+  $("pass").focus();
+}
+
+const $ = (id) => document.getElementById(id);
+// seasons run 1 October to 30 September; 2026 means 2026/27
+const seasonOf = (d) => { const [y, m] = String(d).split("-").map(Number); return m >= 10 ? y : y - 1; };
+const CUR_SEASON = seasonOf(new Date().toISOString().slice(0, 10));
+const seasonLabel = (s) => s === "all" ? "All seasons" : `${s}/${String(s + 1).slice(-2)}`;
+// filters: several values can be picked in each group; a horse must match one value in every group that has a pick
+const FACETS = ["season", "country", "pos", "age", "sex", "status", "course", "sire"];
+const freshFilters = () => Object.fromEntries(FACETS.map((k) => [k, new Set(k === "season" ? [CUR_SEASON] : [])]));
+const state = { horses: [], f: freshFilters(), q: "", view: "horses", role: "owner", watched: new Set(), all: false };
+const courseOf = (r) => r.course || r.meeting;
+// a name search looks across every season
+const inSeason = (d) => !state.f.season.size || !!state.q || (d && state.f.season.has(seasonOf(d)));
+const runOk = (r) => inSeason(r.date) && (!state.f.country.size || state.f.country.has(r.country))
+  && (!state.f.course.size || state.f.course.has(courseOf(r))) && (!state.f.age.size || state.f.age.has(r.age ? String(r.age) : "u"));
+const placedRun = (r) => r.pos >= 1 && r.pos <= 3;
+// a run's placing group for the Placing filter: 1, 2, 3, "o" (4th or worse) or "nf" (did not finish)
+const posKey = (r) => placedRun(r) ? String(r.pos) : r.pos ? "o" : "nf";
+// in the default view only placed runs count; "All runners" counts every run
+const runsIn = (h) => (h.runs || []).filter((r) => runOk(r) && (state.all || placedRun(r)));
+// sex from the pedigree record, or from the race title (e.g. "Maiden for 4-y-o Mares")
+const sexGroup = (h) => {
+  const s = String(h.sex || "").toLowerCase();
+  if (s === "g") return "g";
+  if (s === "m" || s === "f") return "f";
+  if (["c", "h", "r"].includes(s)) return "c";
+  const t = (h.runs || []).map((r) => r.race || "").join(" ");
+  return /\b(mares?|fillies)\b/i.test(t) ? "f" : /\bgeldings?\b/i.test(t) ? "g" : "";
+};
+const SEX = { g: "gelding", m: "mare", f: "filly", c: "colt", h: "horse", r: "rig" };
+const COL = { b: "bay", br: "brown", ch: "chestnut", gr: "grey", bl: "black", ro: "roan", "b/br": "bay/brown" };
+const sireKey = (s) => String(s || "").replace(/\s*\([A-Z]{2,3}\)\s*$/, "").trim();
+
+const fmtDate = (d) => d ? new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "2-digit" }) : "";
+// non-finisher codes as IHRB and GB Pointing print them
+const NF = { P: "PU", PU: "PU", F: "F", U: "UR", UR: "UR", R: "Ref", REF: "Ref", RO: "RO", B: "BD", BD: "BD", BRD: "BD", S: "SU", SU: "SU", C: "CO", CO: "CO", D: "Disq", DSQ: "Disq", RTR: "RR", RR: "RR" };
+const NF_LONG = { PU: "pulled up", F: "fell", UR: "unseated rider", Ref: "refused", RO: "ran out", BD: "brought down", SU: "slipped up", CO: "carried out", Disq: "disqualified", RR: "refused to race" };
+const nfCode = (st) => NF[String(st || "").toUpperCase()] || String(st || "-");
+const ordN = (n) => n % 100 >= 11 && n % 100 <= 13 ? n + "th" : n + (["th", "st", "nd", "rd"][n % 10] || "th");
+const ord = (n, st) => n ? ordN(n) : nfCode(st);
+const posLong = (r) => r.pos ? ordN(r.pos) : (NF_LONG[nfCode(r.st)] || nfCode(r.st));
+// best finishing position across runs (non-finishers count as worst)
+const bestRun = (rs) => rs.reduce((b, r) => (!b || (r.pos || 99) < (b.pos || 99)) ? r : b, null) || {};
+const today = new Date().toISOString().slice(0, 10);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clean = (s) => String(s ?? "").replace(/&amp;/g, "&").replace(/&#39;/g, "'");
+
+const SEASON_START = "2026-10-01";
+// sale-house brand colours, taken from each company's own site
+const brandClass = (h) => /goffs/i.test(h) ? "b-goffs" : /ireland/i.test(h) ? "b-tatts-ie" : /cheltenham/i.test(h) ? "b-tatts-chelt" : /online/i.test(h) ? "b-tatts-onl" : /arqana/i.test(h) ? "b-arqana" : /thoroughbid/i.test(h) ? "b-tbid" : /tattersalls/i.test(h) ? "b-tatts" : "";
+const houseShort = (h) => /goffs/i.test(h) ? "Goffs" : /ireland/i.test(h) ? "Tatts Ireland" : /cheltenham/i.test(h) ? "Tatts Cheltenham" : /online/i.test(h) ? "Tatts Online" : /arqana/i.test(h) ? "Arqana" : /thoroughbid/i.test(h) ? "ThoroughBid" : "Tattersalls";
+// money in the sale's own currency; guineas are written after the number
+const money = (cur, n) => { const v = Number(n).toLocaleString("en-GB"); return cur === "gns" ? v + "gns" : (cur || "") + v; };
+const bidText = (l) => !l.bid ? "" : /^\d+(\.\d+)?$/.test(String(l.bid)) ? " (bid " + money(l.cur, l.bid) + ")" : /^not sold/i.test(l.bid) && l.bid.length > 8 ? " " + esc(l.bid.replace(/^not sold\s*/i, "")) : "";
+const HOUSES = "Goffs, Tatts Ireland, Tatts Cheltenham, Tatts Online, Arqana, ThoroughBid";
+// entered in a sale that has not happened yet
+const isCurrent = (l) => !l.sold && !l.withdrawn && !l.bid && (l.date ? l.date >= today : (l.year && l.year >= new Date().getFullYear()));
+// sold at a sale since this point-to-point season began
+const isSoldThisSeason = (l) => l.sold && l.price && (!state.f.season.size || (l.date && state.f.season.has(seasonOf(l.date))));
+function lotStatus(l) {
+  if (l.sold && l.price) return { cls: "sold", text: `${l.ps ? "Sold privately" : "Sold"} ${money(l.cur, l.price)}${l.ps && l.ring ? ` (unsold in the ring at ${money(l.cur, l.ring)})` : ""}` };
+  if (l.withdrawn) return { cls: "muted", text: "Withdrawn" };
+  if (l.bid || (l.date && l.date < today) || (!l.date && l.year && l.year < new Date().getFullYear())) return { cls: "muted", text: "Not sold" };
+  return { cls: "", text: "Entered" };
+}
+
+function notice(title, body) {
+  $("list").innerHTML = `<div class="notice"><b>${esc(title)}</b>${esc(body)}</div>`;
+}
+
+async function load() {
+  $("refresh").disabled = true;
+  try {
+    if (!getKey()) { askKey(); return; }
+    const res = await rpc("app_tracker", { p_key: getKey(), p_all: state.all });
+    const data = res.data || {};
+    state.role = res.role || "owner";
+    state.watched = new Set(res.watch || []);
+    $("demo").hidden = state.role !== "demo";
+    $("watchchip").hidden = state.role === "demo";
+    // CSV export is a subscriber feature: shown locked for demo and guest passcodes
+    const canExport = state.role === "owner";
+    $("csv").textContent = canExport ? "Export CSV" : "🔒 Export CSV";
+    $("csv").title = canExport ? "" : "Available to subscribers";
+    state.horses = (data.horses || []).filter((h) => h.runs && h.runs.length);
+    state.cheltChecked = data.chelt_checked || null;
+    if (data.updated) $("sub").textContent = "Data checked " + new Date(data.updated).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    render();
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "bad_key") { setKey(""); askKey(" That passcode was not accepted."); return; }
+    else notice("Couldn't load results", " " + ((e && e.message) || "Unknown error") + ". Tap Refresh to try again.");
+  } finally {
+    $("refresh").disabled = false;
+  }
+}
+
+// facets: "all" checks every group; leave out a group name to ignore it (used for the headline numbers)
+function matches(h, skip = []) {
+  const f = state.f, runs = runsIn(h), lots = h.lots || [];
+  if (!runs.length) return false;
+  if (!skip.includes("pos") && f.pos.size && !runs.some((r) => f.pos.has(posKey(r)))) return false;
+  if (f.sex.size && !f.sex.has(sexGroup(h) || "u")) return false;
+  if (f.sire.size && !f.sire.has(sireKey(h.sire) || "Not yet known")) return false;
+  if (!skip.includes("status") && f.status.size) {
+    const ok = (f.status.has("sale") && lots.some(isCurrent)) || (f.status.has("sold") && lots.some(isSoldThisSeason))
+      || (f.status.has("ps") && lots.some((l) => l.sold && l.ps && isSoldThisSeason(l)))
+      || (f.status.has("unsold") && !lots.some((l) => l.sold)) || (f.status.has("watch") && state.watched.has(h.id));
+    if (!ok) return false;
+  }
+  if (state.q) {
+    const hay = [h.name, h.sire, h.dam, h.dam_sire, ...runs.flatMap((r) => [r.trainer, r.rider, r.meeting, r.venue, r.course]), ...lots.flatMap((l) => [l.consignor, l.purchaser])].join(" ").toLowerCase();
+    if (!state.q.split(/\s+/).every((t) => hay.includes(t))) return false;
+  }
+  return true;
+}
+
+function card(h) {
+  const runs = h.runs, lots = h.lots || [], r0 = runs[0], b = bestRun(runs), best = b.pos || 0;
+  const desc = [COL[String(h.colour || "").toLowerCase()], SEX[String(h.sex || "").toLowerCase()]].filter(Boolean).join(" ")
+    + (!h.sex && /^Colt when sold/.test(h.sex_source || "") ? `sex not confirmed (${h.sex_source.toLowerCase()})` : "");
+  const ageBits = [r0.age ? `${r0.age}yo` : "", desc, h.foaled_year ? `foaled ${h.foaled_year}` : ""].filter(Boolean).join(" · ");
+  const breed = h.sire
+    ? `by <b>${esc(h.sire)}</b> out of ${esc(h.dam || "?")}${h.dam_sire ? ` (${esc(h.dam_sire)})` : ""}`
+    : "Pedigree not yet known";
+  const ageTxt = ageBits ? ageBits + "<br>" : "";
+  const rp = "https://www.google.com/search?q=" + encodeURIComponent(`site:racingpost.com/profile/horse "${h.name}"`);
+  const pq = "https://www.pedigreequery.com/" + encodeURIComponent(h.name.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim().replace(/\s+/g, "+")).replace(/%2B/g, "+");
+  const horseLink = h.horse_url || r0.url;
+  const tatts = "https://www.tattersalls.ie/search-results/?criterion=" + encodeURIComponent(h.name);
+  const current = lots.filter(isCurrent), soldNow = lots.filter(isSoldThisSeason);
+  const history = lots.filter((l) => !isCurrent(l) && !isSoldThisSeason(l));
+  const saleTags =
+    current.map((l) => `<a class="tag forsale ${brandClass(l.house)}" href="${esc(l.url)}" target="_blank" rel="noopener">For sale: ${houseShort(l.house)}${l.date ? " " + fmtDate(l.date).replace(/ \d\d$/, "") : ""}, Lot ${esc(l.lot)} ↗</a>`).join("")
+    + soldNow.map((l) => `<a class="tag sold ${brandClass(l.house)}" href="${esc(l.url)}" target="_blank" rel="noopener">${l.ps ? "Sold privately" : "Sold"} ${money(l.cur, l.price)} at ${houseShort(l.house)} ↗</a>`).join("")
+    + (!current.length && !soldNow.length ? `<span class="tag muted">Not entered (${HOUSES})</span>` : "")
+    + (history.length ? `<span class="tag muted">${history.length} earlier sale${history.length > 1 ? "s" : ""}</span>` : "")
+;
+  const lotItem = (l) => { const s = lotStatus(l); return `<li><span class="n">${esc(l.lot)}</span><div>
+          <div><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(/goffs|tattersalls|arqana|thoroughbid/i.test(clean(l.sale)) ? clean(l.sale) : houseShort(l.house) + " " + clean(l.sale))}</a>${l.date ? " · " + fmtDate(l.date) : ""}${l.type ? " · " + esc(l.type) : ""}</div>
+          <div class="meta"><span class="money">${s.text}${bidText(l)}</span>${l.purchaser ? " · bought by " + esc(l.purchaser) : ""}${l.consignor ? " · consignor " + esc(l.consignor) : ""}</div>
+        </div></li>`; };
+  return `<details class="card">
+    <summary>
+      <div class="pos ${best >= 1 && best <= 3 ? "p" + best : "px"}${best ? "" : " nf"}" aria-label="Best placing ${esc(posLong(b))}">${best || esc(nfCode(b.st))}</div>
+      <div class="name">${esc(h.name)}<span class="flag">${esc(r0.country)}</span></div>
+      ${state.role === "owner" ? `<button class="star" type="button" data-star="${h.id}" aria-pressed="${state.watched.has(h.id)}" aria-label="Watchlist">${state.watched.has(h.id) ? "★" : "☆"}</button>` : ""}
+      <div class="ped">${ageTxt}${breed}</div>
+      <div class="last">${ord(r0.pos, r0.st)}, ${esc(r0.course || r0.meeting)}${r0.course ? ` <span class="meta">${esc(r0.meeting)}</span>` : ""} <span class="date">${fmtDate(r0.date)}</span></div>
+      <div class="saleline">${saleTags}</div>
+    </summary>
+    <div class="detail">
+      <div>
+        <h3>Pedigree</h3>
+        ${h.sire
+          ? `<div>Sire <b>${esc(h.sire)}</b> · Dam ${esc(h.dam || "not known")} · Dam's sire ${esc(h.dam_sire || "not known")}</div>
+             ${h.pedigree_source ? `<div class="pedsrc">Source: ${esc(h.pedigree_source)}</div>` : ""}`
+          : `<div class="note">Not published with Irish results.${state.role === "owner" ? " Look it up, then save it here." : ""}</div>`}
+        ${state.role !== "owner" ? "" : `<form class="pedform" data-id="${h.id}" style="margin-top:8px">
+          <input id="ps-${h.id}" name="sire" placeholder="Sire" value="${esc(h.sire || "")}" aria-label="Sire">
+          <input id="pd-${h.id}" name="dam" placeholder="Dam" value="${esc(h.dam || "")}" aria-label="Dam">
+          <input id="pds-${h.id}" name="damsire" placeholder="Dam's sire" value="${esc(h.dam_sire || "")}" aria-label="Dam's sire">
+          <div class="act"><button class="btn" type="submit">${h.sire ? "Update pedigree" : "Save pedigree"}</button><span class="msg" aria-live="polite"></span></div>
+        </form>`}
+      </div>
+      <div>
+        <h3>Point-to-point form</h3>
+        <ul class="runs">${runs.map((r) => `<li><span class="n${placedRun(r) ? "" : " unpl"}" title="${esc(posLong(r))}">${ord(r.pos, r.st)}</span><div>
+          <div><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.course || r.meeting)}</a>${r.course ? ` <span class="meta">${esc(r.meeting)}</span>` : ""} · ${esc(r.race)}</div>
+          <div class="meta">${fmtDate(r.date)}${r.going ? " · " + esc(r.going) : ""}${r.dist ? " · btn " + esc(r.dist) : ""}${r.sp ? " · SP " + esc(r.sp) : ""}${r.trainer ? " · Tr " + esc(r.trainer) : ""}${r.rider ? " · Rdr " + esc(r.rider) : ""}</div>
+          ${r.comment ? `<div class="comment">${esc(r.comment)}</div>` : ""}
+        </div></li>`).join("")}</ul>
+      </div>
+      <div>
+        <h3>For sale now</h3>
+        ${current.length ? `<ul class="lots">${current.map(lotItem).join("")}</ul>` : `<div class="note">Not entered in any upcoming sale (${HOUSES}).${state.cheltChecked ? " Last checked " + fmtDate(state.cheltChecked) + "." : ""}</div>`}
+      </div>
+      ${soldNow.length ? `<div><h3>Sold this season</h3><ul class="lots">${soldNow.map(lotItem).join("")}</ul></div>` : ""}
+      ${history.length ? `<div><h3>Earlier sales (as a foal, yearling or store)</h3><ul class="lots">${history.map(lotItem).join("")}</ul></div>` : ""}
+      <div class="links">
+        <a href="${esc(horseLink)}" target="_blank" rel="noopener">${h.horse_url ? "GB Pointing horse page" : "IHRB result"}</a>
+        <a href="${rp}" target="_blank" rel="noopener">Racing Post form</a>
+        <a href="${pq}" target="_blank" rel="noopener">Look up pedigree</a>
+      </div>
+    </div>
+  </details>`;
+}
+
+// prices from a set of sale lots: euros, and sterling (guineas converted at 1.05)
+function priceSets(lots) {
+  const eur = [], gbp = [];
+  lots.filter((l) => l.sold && l.price).forEach((l) => { if (l.cur === "gns") gbp.push(Number(l.price) * 1.05); else (l.cur === "£" ? gbp : eur).push(Number(l.price)); });
+  return { eur, gbp };
+}
+const fmtN = (n) => Math.round(n).toLocaleString("en-GB");
+const avgTxt = (p) => [p.eur.length ? "€" + fmtN(p.eur.reduce((a, b) => a + b, 0) / p.eur.length) : "", p.gbp.length ? "£" + fmtN(p.gbp.reduce((a, b) => a + b, 0) / p.gbp.length) : ""].filter(Boolean).join(" / ") || "–";
+const topTxt = (p) => [p.eur.length ? "€" + fmtN(Math.max(...p.eur)) : "", p.gbp.length ? "£" + fmtN(Math.max(...p.gbp)) : ""].filter(Boolean).join(" / ") || "–";
+const pct = (a, b) => b ? Math.round(100 * a / b) + "%" : "–";
+
+function statTable(rows, cols, keyLabel, emptyKey, note) {
+  return rows.length ? `<div class="tablewrap"><table class="sires">
+    <thead><tr><th>${keyLabel}</th>${cols.map((c) => `<th>${c[0]}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map((r) => `<tr><td>${r.key === emptyKey ? `<span class="note">${esc(emptyKey)}</span>` : `<button type="button" data-pick="${esc(r.key)}" data-kind="${esc(r.kind)}">${esc(r.key)}</button>`}</td>
+      ${cols.map((c) => `<td${c[2] ? ' class="money"' : ""}>${c[1](r)}</td>`).join("")}</tr>`).join("")}</tbody>
+  </table></div><p class="note">${note}</p>` : `<div class="empty">No horses match these filters.</div>`;
+}
+
+function renderFacets() {
+  const f = state.f;
+  const nSex = state.horses.filter((h) => !sexGroup(h)).length;
+  const nAge = state.horses.filter((h) => (h.runs || []).some((r) => !r.age)).length;
+  $("sex-u").hidden = !nSex; $("sex-u").textContent = `Not known (${nSex})`;
+  $("age-u").hidden = !nAge; $("age-u").textContent = `Not known (${nAge})`;
+  const seasons = [...new Set(state.horses.flatMap((h) => (h.runs || []).map((r) => seasonOf(r.date))))].sort((a, b) => b - a);
+  $("f-season").innerHTML = seasons.map((x) => `<button class="chip" type="button" data-facet="season" data-v="${x}" aria-pressed="${f.season.has(x)}">${seasonLabel(x)}</button>`).join("")
+    + `<button class="chip" type="button" data-facet="season" data-v="" aria-pressed="${!f.season.size}">All seasons</button>`;
+  // course and sire lists: counts within the chosen seasons and countries
+  const cc = {}, sc = {};
+  state.horses.forEach((h) => {
+    const rs = (h.runs || []).filter((r) => inSeason(r.date) && (!f.country.size || f.country.has(r.country)));
+    if (!rs.length) return;
+    new Set(rs.map(courseOf)).forEach((c) => { cc[c] = (cc[c] || 0) + 1; });
+    const k = sireKey(h.sire) || "Not yet known"; sc[k] = (sc[k] || 0) + 1;
+  });
+  const opts = (facet, counts) => Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([k, n]) => `<label data-name="${esc(k.toLowerCase())}"><input type="checkbox" data-facet="${facet}" value="${esc(k)}"${f[facet].has(k) ? " checked" : ""}> ${esc(k)}<span>${n}</span></label>`).join("");
+  $("o-course").innerHTML = opts("course", cc);
+  $("o-sire").innerHTML = opts("sire", sc);
+  const sum = (set, none) => !set.size ? none : set.size === 1 ? [...set][0] : `${set.size} selected`;
+  $("m-course").querySelector("summary").textContent = sum(f.course, "All courses");
+  $("m-sire").querySelector("summary").textContent = sum(f.sire, "All sires");
+}
+
+// cards are drawn 40 at a time; more appear as you scroll
+const PAGE = 40;
+function pageHtml() {
+  const n = state.page * PAGE, list = state.shown || [];
+  return list.slice(0, n).map(card).join("") + (list.length > n ? `<button class="chip more" type="button" id="more">Show more (${list.length - n} left)</button>` : "");
+}
+const moreObserver = "IntersectionObserver" in window ? new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) showMore(); }, { rootMargin: "600px" }) : null;
+function showMore() {
+  const b = $("more"); if (!b) return;
+  state.page++;
+  b.insertAdjacentHTML("beforebegin", (state.shown || []).slice((state.page - 1) * PAGE, state.page * PAGE).map(card).join(""));
+  const left = state.shown.length - state.page * PAGE;
+  if (left > 0) b.textContent = `Show more (${left} left)`; else b.remove();
+}
+// filter taps update the button at once and redraw the list on the next frame, so quick taps feel instant
+let renderTimer = null;
+function scheduleRender() {
+  $("list").classList.add("busy");
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => requestAnimationFrame(() => { render(); $("list").classList.remove("busy"); }), 90);
+}
+let facetKey = "";
+function render() {
+  // course and sire lists only need rebuilding when the season or country picks change
+  const fk = [...state.f.season].join() + "|" + [...state.f.country].join() + "|" + state.horses.length + "|" + [...state.f.course].join() + "|" + [...state.f.sire].join();
+  if (fk !== facetKey) { facetKey = fk; renderFacets(); }
+  const f = state.f;
+  const base = state.horses.filter((h) => matches(h, ["pos", "status"]));
+  $("s-horses").textContent = base.length;
+  $("s-win").textContent = base.filter((h) => runsIn(h).some((r) => r.pos === 1)).length;
+  $("s-entered").textContent = base.filter((h) => (h.lots || []).some(isCurrent)).length;
+  $("s-sold").textContent = base.filter((h) => (h.lots || []).some(isSoldThisSeason)).length;
+  $("s-sold-l").textContent = f.season.size === 1 ? ([...f.season][0] === CUR_SEASON ? "Sold this season" : "Sold " + seasonLabel([...f.season][0])) : "Sold";
+  syncControls();
+
+  const shown = state.horses.filter((h) => matches(h));
+  const by = (keyFn, kind) => {
+    const rows = {};
+    shown.forEach((h) => {
+      for (const k of new Set([].concat(keyFn(h)).filter((x) => x !== undefined))) {
+        const r = rows[k] ||= { key: k, kind, horses: 0, win: 0, sale: 0, sold: 0, lots: [] };
+        r.horses++;
+        if (runsIn(h).some((x) => x.pos === 1)) r.win++;
+        if ((h.lots || []).length) r.sale++;
+        if ((h.lots || []).some((l) => l.sold && l.price)) r.sold++;
+        r.lots.push(...(kind === "consignor" ? (h.lots || []).filter((l) => (l.consignor || "").trim() === k) : (h.lots || [])));
+      }
+    });
+    return Object.values(rows).map((r) => Object.assign(r, { p: priceSets(r.lots) }));
+  };
+  const priceCols = [["Sold", (r) => r.sold], ["Avg price", (r) => avgTxt(r.p), 1], ["Top price", (r) => topTxt(r.p), 1]];
+  const seasonNote = !f.season.size ? "all seasons" : [...f.season].sort().map(seasonLabel).join(", ");
+  const base2 = shown;
+
+  if (state.view === "sires") {
+    const list = by((h) => sireKey(h.sire) || "Not yet known", "sire").sort((a, b) => (a.key === "Not yet known") - (b.key === "Not yet known") || b.horses - a.horses || b.win - a.win);
+    $("count").textContent = `${list.length} sires`;
+    $("list").innerHTML = statTable(list, [["Placed", (r) => r.horses], ["Winners", (r) => r.win], ["Win %", (r) => pct(r.win, r.horses)], ["In a sale", (r) => r.sale], ...priceCols],
+      "Sire", "Not yet known", `Placed 4 and 5-year-olds by sire, ${seasonNote}. Prices are every recorded sale of those horses, including as foals, yearlings and stores. Tap a sire to see its horses.`);
+    return;
+  }
+  if (state.view === "handlers") {
+    const list = by((h) => [...new Set(runsIn(h).map((r) => r.trainer).filter(Boolean))], "handler").sort((a, b) => b.win - a.win || b.horses - a.horses);
+    $("count").textContent = `${list.length} handlers`;
+    $("list").innerHTML = statTable(list, [["Placed", (r) => r.horses], ["Winners", (r) => r.win], ["Win %", (r) => pct(r.win, r.horses)], ["In a sale", (r) => r.sale], ...priceCols],
+      "Handler", "", `GB handlers (trainers) of placed 4 and 5-year-olds, ${seasonNote}. Irish results don't name the handler; use Consignors for Irish pointers. Tap a name to see the horses.`);
+    return;
+  }
+  if (state.view === "courses") {
+    const list = by((h) => [...new Set(runsIn(h).map(courseOf).filter(Boolean))], "course").sort((a, b) => b.horses - a.horses || b.win - a.win);
+    $("count").textContent = `${list.length} courses`;
+    $("list").innerHTML = statTable(list, [["Placed", (r) => r.horses], ["Winners", (r) => r.win], ["In a sale", (r) => r.sale], ...priceCols],
+      "Course", "", `Placed 4 and 5-year-olds by course, ${seasonNote}. Irish meetings before December 2025 show the hunt, as the course isn't published. Tap a course to see the horses.`);
+    return;
+  }
+  if (state.view === "buyers") {
+    // each sold lot of the horses shown, grouped by buyer
+    const rows = {};
+    shown.forEach((h) => (h.lots || []).filter((l) => l.sold && l.price && l.purchaser && isSoldThisSeason(l)).forEach((l) => {
+      const k = l.purchaser.trim();
+      const r = rows[k] ||= { key: k, kind: "buyer", ids: new Set(), win: new Set(), lots: [], ps: 0, houses: new Set() };
+      r.ids.add(h.id); if (runsIn(h).some((x) => x.pos === 1)) r.win.add(h.id);
+      r.lots.push(l); if (l.ps) r.ps++; r.houses.add(houseShort(l.house));
+    }));
+    const list = Object.values(rows).map((r) => Object.assign(r, { p: priceSets(r.lots), spend: priceSets(r.lots) }))
+      .sort((a, b) => b.lots.length - a.lots.length || b.ids.size - a.ids.size);
+    $("count").textContent = `${list.length} buyers`;
+    $("list").innerHTML = statTable(list, [["Horses", (r) => r.ids.size], ["Winners", (r) => r.win.size], ["Bought", (r) => r.lots.length], ["Privately", (r) => r.ps || "–"],
+      ["Avg price", (r) => avgTxt(r.p), 1], ["Top price", (r) => topTxt(r.p), 1], ["Where", (r) => [...r.houses].join(", ")]],
+      "Buyer", "", `Who bought the placed 4 and 5-year-olds: ${!f.season.size ? "all sales" : "sales in " + seasonNote}, including private sales. Tap a name to see the horses.`);
+    return;
+  }
+  if (state.view === "consignors") {
+    const list = by((h) => [...new Set((h.lots || []).map((l) => (l.consignor || "").trim()).filter(Boolean))], "consignor")
+      .map((r) => Object.assign(r, { soldLots: r.lots.filter((l) => l.sold && l.price).length }))
+      .sort((a, b) => b.soldLots - a.soldLots || b.horses - a.horses);
+    $("count").textContent = `${list.length} consignors`;
+    $("list").innerHTML = statTable(list, [["Horses", (r) => r.horses], ["Winners", (r) => r.win], ["Lots", (r) => r.lots.length], ["Sold", (r) => r.soldLots], ["Avg price", (r) => avgTxt(r.p), 1], ["Top price", (r) => topTxt(r.p), 1]],
+      "Consignor", "", `Who sold the placed 4 and 5-year-olds (${seasonNote}), across Goffs, Tattersalls and Arqana. For Irish pointers the consignor is usually the handler. Tap a name to see the horses.`);
+    return;
+  }
+  $("count").textContent = `${shown.length} shown`;
+  state.shown = shown; state.page = 1;
+  $("list").innerHTML = shown.length ? pageHtml() : `<div class="empty">${state.f.status.has("watch") && state.f.status.size === 1 ? "No horses on your watchlist for these filters. Tap ☆ on a horse to add it." : "No horses match these filters."}</div>`;
+}
+
+// how many picks differ from the default (this season, everything else open)
+function activeFilters() {
+  const f = state.f;
+  const seasonDefault = f.season.size === 1 && f.season.has(CUR_SEASON);
+  return (state.all ? 1 : 0) + FACETS.reduce((n, k) => n + (k === "season" ? (seasonDefault ? 0 : Math.max(1, f.season.size)) : f[k].size), 0);
+}
+function setPanel(open) {
+  $("fpanel").hidden = !open;
+  $("ftoggle").setAttribute("aria-expanded", String(open));
+  try { localStorage.setItem("ptp_filters_open", open ? "1" : "0"); } catch {}
+}
+function syncControls() {
+  const n = activeFilters();
+  $("fbadge").textContent = n; $("fbadge").hidden = n === 0;
+  $("fclear").hidden = n === 0 && !state.q;
+  document.querySelectorAll(".chip[data-facet]").forEach((c) => {
+    const set = state.f[c.dataset.facet], v = c.dataset.facet === "season" && c.dataset.v ? Number(c.dataset.v) : c.dataset.v;
+    c.setAttribute("aria-pressed", String(c.dataset.facet === "season" && !c.dataset.v ? !set.size : set.has(v)));
+  });
+  document.querySelectorAll(".chip[data-view]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.view === state.view)));
+  document.querySelectorAll(".chip[data-scope]").forEach((c) => c.setAttribute("aria-pressed", String((c.dataset.scope === "all") === state.all)));
+  document.querySelectorAll(".chip.scope-all").forEach((c) => { c.hidden = !state.all; });
+  const f = state.f, st = f.status, onlyPos1 = f.pos.size === 1 && f.pos.has("1");
+  const stat = !f.pos.size && !st.size ? "all" : onlyPos1 && !st.size ? "win" : !f.pos.size && st.size === 1 ? [...st][0] : "";
+  document.querySelectorAll(".stat").forEach((s) => s.setAttribute("aria-pressed", String(s.dataset.stat === stat)));
+}
+
+document.querySelectorAll(".stat").forEach((b) => b.addEventListener("click", () => {
+  const k = b.dataset.stat;
+  state.f.pos = new Set(k === "win" ? ["1"] : []);
+  state.f.status = new Set(k === "sale" || k === "sold" ? [k] : []);
+  state.view = "horses";
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}));
+document.querySelectorAll(".chip[data-view]").forEach((b) => b.addEventListener("click", () => { state.view = b.dataset.view; render(); }));
+// Placed only (small, fast) or every 4 and 5-year-old runner (larger download)
+document.querySelectorAll(".chip[data-scope]").forEach((b) => b.addEventListener("click", () => {
+  const all = b.dataset.scope === "all";
+  if (all === state.all) return;
+  state.all = all;
+  if (!all) { state.f.pos.delete("o"); state.f.pos.delete("nf"); }
+  syncControls();
+  $("list").innerHTML = `<div class="empty">${all ? "Loading every runner…" : "Loading placed runners…"}</div>`;
+  load();
+}));
+$("list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-pick]");
+  if (b) {
+    if (b.dataset.kind === "sire" || b.dataset.kind === "course") state.f[b.dataset.kind] = new Set([b.dataset.pick]);
+    else { state.q = b.dataset.pick.toLowerCase(); $("q").value = b.dataset.pick; }
+    state.view = "horses"; render(); window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const st = e.target.closest("button[data-star]");
+  if (st) {
+    e.preventDefault(); e.stopPropagation();
+    const id = Number(st.dataset.star), on = !state.watched.has(id);
+    on ? state.watched.add(id) : state.watched.delete(id);
+    st.setAttribute("aria-pressed", String(on)); st.textContent = on ? "★" : "☆";
+    try { await rpc("app_watch", { p_key: getKey(), p_id: id, p_on: on }); }
+    catch { on ? state.watched.delete(id) : state.watched.add(id); st.setAttribute("aria-pressed", String(!on)); st.textContent = !on ? "★" : "☆"; }
+  }
+});
+// filter chips: tap to add or remove; "All seasons" clears the season picks
+$("fpanel").addEventListener("click", (e) => {
+  const c = e.target.closest(".chip[data-facet]");
+  if (!c) return;
+  const k = c.dataset.facet, set = state.f[k];
+  if (k === "season" && !c.dataset.v) set.clear();
+  else { const v = k === "season" ? Number(c.dataset.v) : c.dataset.v; set.has(v) ? set.delete(v) : set.add(v); }
+  syncControls();
+  scheduleRender();
+});
+$("fpanel").addEventListener("change", (e) => {
+  const i = e.target.closest('input[type="checkbox"][data-facet]');
+  if (!i) return;
+  const set = state.f[i.dataset.facet];
+  i.checked ? set.add(i.value) : set.delete(i.value);
+  const sum = !set.size ? (i.dataset.facet === "course" ? "All courses" : "All sires") : set.size === 1 ? [...set][0] : `${set.size} selected`;
+  $("m-" + i.dataset.facet).querySelector("summary").textContent = sum;
+  facetKey = [...state.f.season].join() + "|" + [...state.f.country].join() + "|" + state.horses.length + "|" + [...state.f.course].join() + "|" + [...state.f.sire].join();
+  syncControls();
+  scheduleRender();
+});
+$("fpanel").addEventListener("input", (e) => {
+  const i = e.target.closest("input[data-find]");
+  if (!i) return;
+  const t = i.value.trim().toLowerCase();
+  $("o-" + i.dataset.find).querySelectorAll("label").forEach((l) => { l.hidden = !!t && !l.dataset.name.includes(t); });
+});
+$("list").addEventListener("submit", async (e) => {
+  const form = e.target.closest("form.pedform");
+  if (!form) return;
+  e.preventDefault();
+  const id = Number(form.dataset.id), msg = form.querySelector(".msg"), btn = form.querySelector("button");
+  const v = (n) => form.elements[n].value.trim();
+  if (!v("sire")) { msg.textContent = "Enter at least the sire."; return; }
+  btn.disabled = true; msg.textContent = "Saving…";
+  try {
+    await rpc("app_set_pedigree", { p_key: getKey(), p_id: id, p_sire: v("sire"), p_dam: v("dam"), p_dam_sire: v("damsire") });
+    const h = state.horses.find((x) => x.id === id);
+    if (h) Object.assign(h, { sire: v("sire"), dam: v("dam") || null, dam_sire: v("damsire") || null, pedigree_source: "Entered by you" });
+    msg.textContent = "Saved.";
+    setTimeout(load, 600);
+  } catch (err) {
+    msg.textContent = err && err.code === "bad_key" ? "Passcode not accepted. Tap Refresh and enter it again." : "Couldn't save: " + ((err && err.message) || "unknown error");
+  } finally { btn.disabled = false; }
+});
+
+$("q").addEventListener("input", (e) => { state.q = e.target.value.trim().toLowerCase(); scheduleRender(); });
+$("list").addEventListener("click", (e) => { if (e.target.id === "more") showMore(); });
+new MutationObserver(() => { const b = $("more"); if (b && moreObserver) { moreObserver.disconnect(); moreObserver.observe(b); } }).observe($("list"), { childList: true });
+$("refresh").addEventListener("click", () => load());
+// CSV of whatever is on screen: the table in the stats views, or one row per horse in the Horses view
+function csvCell(v) { const t = String(v ?? "").replace(/\s+/g, " ").trim(); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; }
+$("csv").addEventListener("click", async () => {
+  if (state.role !== "owner") {
+    const b = $("csv");
+    b.textContent = "🔒 Export is for subscribers";
+    setTimeout(() => { b.textContent = "🔒 Export CSV"; }, 2500);
+    return;
+  }
+  let rows;
+  const table = $("list").querySelector("table");
+  if (state.view !== "horses" && table) {
+    rows = [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent));
+  } else {
+    rows = [["Horse", "Country", "Sex", "Foaled", "Sire", "Dam", "Dam's sire", "Best placing", "Wins", "Runs", "Latest run", "Course", "Hunt", "Race", "Handler", "Latest sale status", "Latest sale", "Latest sale date", "Lot", "Price", "Currency", "Private sale", "Ring bid", "Buyer", "Consignor", "Number of sales", "All sales (newest first)"]];
+    (state.shown || []).forEach((h) => {
+      const rs = runsIn(h), r0 = rs[0] || h.runs[0], lots = h.lots || [];
+      const l = lots.find(isCurrent) || lots[0] || {}; // upcoming entry first, otherwise the most recent sale
+      rows.push([h.name, r0.country, SEX[String(h.sex || "").toLowerCase()] || "", h.foaled_year || "", h.sire || "", h.dam || "", h.dam_sire || "",
+        posLong(bestRun(rs)), rs.filter((x) => x.pos === 1).length, rs.length, r0.date, r0.course || "", r0.meeting, r0.race, r0.trainer || "",
+        l.house ? (isCurrent(l) ? "For sale" : l.sold ? "Sold" : l.withdrawn ? "Withdrawn" : "Not sold") : "", l.sale || "", l.date || l.year || "", l.lot || "",
+        l.price || "", l.cur || "", l.ps ? "Yes" : "", l.ring || l.bid || "", l.purchaser || "", l.consignor || "", lots.length,
+        lots.map((x) => `${x.date || x.year || "date not published"} ${clean(x.sale)} Lot ${x.lot}: ${lotStatus(x).text}${x.purchaser ? " to " + x.purchaser : ""}`).join(" | ")]);
+    });
+  }
+  const csv = "\ufeff" + rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
+  const name = `ptp-${state.view}-${new Date().toISOString().slice(0, 10)}.csv`;
+  const file = new File([csv], name, { type: "text/csv" });
+  // iPhone and iPad (especially when the app is on the home screen) can't download files: hand the file to the share sheet instead,
+  // where it can be saved to Files, emailed or opened in Excel/Numbers
+  const touch = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+  if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return; }
+    catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(file);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+});
+$("ftoggle").addEventListener("click", () => setPanel($("fpanel").hidden));
+// forget the saved passcode on this device and ask again (e.g. after trying the demo code)
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-switch]")) return;
+  setKey(""); state.horses = []; $("demo").hidden = true; askKey(" Enter your passcode.");
+  window.scrollTo({ top: 0 });
+});
+$("fclear").addEventListener("click", () => {
+  const wasAll = state.all;
+  Object.assign(state, { f: freshFilters(), q: "", view: "horses", all: false });
+  $("q").value = "";
+  if (wasAll) load(); else render();
+});
+try { setPanel(localStorage.getItem("ptp_filters_open") === "1"); } catch { setPanel(false); }
+document.addEventListener("submit", (e) => {
+  if (e.target.id !== "passform") return;
+  e.preventDefault();
+  const k = $("pass").value.trim();
+  if (k) { setKey(k); $("list").innerHTML = ""; load(); }
+});
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && getKey() && state.horses.length) load(); });
+load();
+</script>
+</body>
+</html>
